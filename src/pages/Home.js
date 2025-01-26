@@ -4,11 +4,14 @@ import Post from '../components/Post';
 import SideMenu from '../components/SideMenu';
 import postRepository from '../repositories/post';
 import { SessionContext } from '../sessionProvider';
+import { Pagination } from '../components/Pagination';
 
+const limit = 5;
 function Home() {
   const [content, setContent] = useState('');
   const { currentUser } = useContext(SessionContext);
   const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     fetchPosts();
@@ -20,9 +23,21 @@ function Home() {
     setContent('');
   };
 
-  const fetchPosts = async () => {
-    const posts = await postRepository.find();
+  const fetchPosts = async (page) => {
+    const posts = await postRepository.find(page, limit);
     setPosts(posts);
+  };
+
+  const moveToNext = async () => {
+    const nextPage = page + 1;
+    await fetchPosts(nextPage);
+    setPage(nextPage);
+  };
+
+  const moveToPrev = async () => {
+    const previousPage = page - 1;
+    await fetchPosts(previousPage);
+    setPage(previousPage);
   };
 
   if (currentUser == null) return <Navigate to="/signin" />;
@@ -58,6 +73,10 @@ function Home() {
                 <Post key={post.id} post={post} />
               ))}
             </div>
+            <Pagination
+              onPrev={page > 1 ? moveToPrev : null}
+              onNext={posts.length >= limit ? moveToNext : null}
+            />
           </div>
           <SideMenu />
         </div>
