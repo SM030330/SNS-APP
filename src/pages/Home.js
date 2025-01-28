@@ -29,6 +29,11 @@ function Home() {
     setPosts(posts);
   };
 
+  const deletePost = async (postId) => {
+    await postRepository.delete(postId);
+    setPosts(posts.filter((post) => post.id !== postId));
+  };
+
   const moveToNext = async () => {
     const nextPage = page + 1;
     await fetchPosts(nextPage);
@@ -78,7 +83,7 @@ function Home() {
             </div>
             <div className="mt-4">
               {posts.map((post) => (
-                <Post key={post.id} post={post} />
+                <Post key={post.id} post={post} onDelete={deletePost} />
               ))}
             </div>
             <Pagination
